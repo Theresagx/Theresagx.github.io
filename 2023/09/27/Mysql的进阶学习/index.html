@@ -1,0 +1,372 @@
+<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Mysql的进阶学习 | 薪火传承之地</title><meta name="author" content="坠入往昔的流光"><meta name="copyright" content="坠入往昔的流光"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="前言该篇记录的是“Mysql的D-M-Q基础”后的学习内容，包含表间连接、分页、查询分支技术等。  一、联表查询(Join操作) 联表查询有什么用？假设有如下两个表：以不对称的数据形式保存同一批用户的数据    Name Sex Grade 左A右B Name ID Salary    张三 B 2  张三 1 1000   李四 G 2  赵五 2 2000   赵五 B 1  李四 3 300">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mysql的进阶学习">
+<meta property="og:url" content="http://example.com/2023/09/27/Mysql%E7%9A%84%E8%BF%9B%E9%98%B6%E5%AD%A6%E4%B9%A0/index.html">
+<meta property="og:site_name" content="薪火传承之地">
+<meta property="og:description" content="前言该篇记录的是“Mysql的D-M-Q基础”后的学习内容，包含表间连接、分页、查询分支技术等。  一、联表查询(Join操作) 联表查询有什么用？假设有如下两个表：以不对称的数据形式保存同一批用户的数据    Name Sex Grade 左A右B Name ID Salary    张三 B 2  张三 1 1000   李四 G 2  赵五 2 2000   赵五 B 1  李四 3 300">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/img/Miku2.png">
+<meta property="article:published_time" content="2023-09-27T07:12:45.000Z">
+<meta property="article:modified_time" content="2023-10-09T03:08:55.711Z">
+<meta property="article:author" content="坠入往昔的流光">
+<meta property="article:tag" content="Web学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/img/Miku2.png"><link rel="shortcut icon" href="/img/SNYT.png"><link rel="canonical" href="http://example.com/2023/09/27/Mysql%E7%9A%84%E8%BF%9B%E9%98%B6%E5%AD%A6%E4%B9%A0/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":30},
+  copy: {
+    success: 'Copy Successful',
+    error: 'Copy Error',
+    noSupport: 'Browser Not Supported'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: 'days',
+  dateSuffix: {
+    just: 'Just now',
+    min: 'minutes ago',
+    hour: 'hours ago',
+    day: 'days ago',
+    month: 'months ago'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: 'Load More'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: true,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Mysql的进阶学习',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-10-09 11:08:55'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+      win.saveToLocal = {
+        set: (key, value, ttl) => {
+          if (ttl === 0) return
+          const now = Date.now()
+          const expiry = now + ttl * 86400000
+          const item = {
+            value,
+            expiry
+          }
+          localStorage.setItem(key, JSON.stringify(item))
+        },
+      
+        get: key => {
+          const itemStr = localStorage.getItem(key)
+      
+          if (!itemStr) {
+            return undefined
+          }
+          const item = JSON.parse(itemStr)
+          const now = Date.now()
+      
+          if (now > item.expiry) {
+            localStorage.removeItem(key)
+            return undefined
+          }
+          return item.value
+        }
+      }
+    
+      win.getScript = (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        script.onerror = reject
+        script.onload = script.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          script.onload = script.onreadystatechange = null
+          resolve()
+        }
+
+        Object.keys(attr).forEach(key => {
+          script.setAttribute(key, attr[key])
+        })
+
+        document.head.appendChild(script)
+      })
+    
+      win.getCSS = (url, id = false) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onerror = reject
+        link.onload = link.onreadystatechange = function() {
+          const loadState = this.readyState
+          if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+          link.onload = link.onreadystatechange = null
+          resolve()
+        }
+        document.head.appendChild(link)
+      })
+    
+      win.activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+        if (t === 'dark') activateDarkMode()
+        else if (t === 'light') activateLightMode()
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+      const detectApple = () => {
+        if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+          document.documentElement.classList.add('apple')
+        }
+      }
+      detectApple()
+    })(window)</script><link rel="stylesheet" href="/css/footer.css"><link rel="stylesheet" href="/css/TrendHead.css"><style>#article-container.post-content h1:before, h2:before, h3:before, h4:before, h5:before, h6:before { -webkit-animation: avatar_turn_around 1s linear infinite; -moz-animation: avatar_turn_around 1s linear infinite; -o-animation: avatar_turn_around 1s linear infinite; -ms-animation: avatar_turn_around 1s linear infinite; animation: avatar_turn_around 1s linear infinite; }</style><link rel="stylesheet" href="/css/FooterSet.css"><meta name="generator" content="Hexo 6.3.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">Loading...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+  window.addEventListener('load',() => { preloader.endLoading() })
+
+  if (true) {
+    document.addEventListener('pjax:send', () => { preloader.initLoading() })
+    document.addEventListener('pjax:complete', () => { preloader.endLoading() })
+  }
+})()</script><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/Miku2.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 列表清单</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: transparent"><nav id="nav"><span id="blog-info"><a href="/" title="薪火传承之地"><img class="site-icon" src="/img/KaWhite.png"/><span class="site-name">薪火传承之地</span></a></span><div id="he-plugin-simple"></div><div id="none_space"></div><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><i class="fa-fw fas fa-list"></i><span> 列表清单</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/music/"><i class="fa-fw fas fa-music"></i><span> 音乐</span></a></li><li><a class="site-page child" href="/movies/"><i class="fa-fw fas fa-video"></i><span> 电影</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fas fa-link"></i><span> 友链</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Mysql的进阶学习</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">Created</span><time class="post-meta-date-created" datetime="2023-09-27T07:12:45.000Z" title="Created 2023-09-27 15:12:45">2023-09-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">Updated</span><time class="post-meta-date-updated" datetime="2023-10-09T03:08:55.711Z" title="Updated 2023-10-09 11:08:55">2023-10-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Mysql/">Mysql</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="Mysql的进阶学习"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">Post Views:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>该篇记录的是“Mysql的D-M-Q基础”后的学习内容，包含表间连接、分页、查询分支技术等。</p>
+<hr>
+<h1 id="一、联表查询-Join操作"><a href="#一、联表查询-Join操作" class="headerlink" title="一、联表查询(Join操作)"></a>一、联表查询(Join操作)</h1><hr>
+<h3 id="联表查询有什么用？"><a href="#联表查询有什么用？" class="headerlink" title="联表查询有什么用？"></a>联表查询有什么用？</h3><p>假设有如下两个表：以<strong>不对称</strong>的数据形式保存同一批用户的数据</p>
+<table>
+<thead>
+<tr>
+<th align="center">Name</th>
+<th align="center">Sex</th>
+<th align="center">Grade</th>
+<th align="center">左A右B</th>
+<th align="center">Name</th>
+<th align="center">ID</th>
+<th align="center">Salary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">张三</td>
+<td align="center">B</td>
+<td align="center">2</td>
+<td align="center"></td>
+<td align="center">张三</td>
+<td align="center">1</td>
+<td align="center">1000</td>
+</tr>
+<tr>
+<td align="center">李四</td>
+<td align="center">G</td>
+<td align="center">2</td>
+<td align="center"></td>
+<td align="center">赵五</td>
+<td align="center">2</td>
+<td align="center">2000</td>
+</tr>
+<tr>
+<td align="center">赵五</td>
+<td align="center">B</td>
+<td align="center">1</td>
+<td align="center"></td>
+<td align="center">李四</td>
+<td align="center">3</td>
+<td align="center">3000</td>
+</tr>
+</tbody></table>
+<p>那么<strong>根据Name的值</strong>我们只能在A表中查询到<strong>Sex和Grade</strong>，在B表中查询到<strong>ID和salary</strong>各自两个属性的值。<strong>那再假设我们在A表中查张三的 Sex 和 Grade 值时，还想查到张三的 ID 和 salary 的话，应该怎么做？</strong></p>
+<p>联表查询（称Join操作）就能很好地解决这个问题。Join操作能够<strong>以多个表中相同的字段作为结点（下将这类字段称为结点字段），查询到各个表中的指定数据</strong>。在本例中的体现就是通过Name的”张三”值查询到Sex、Grade、ID、Salary的数据。</p>
+<hr>
+<h3 id="联表查询的三种基础形式"><a href="#联表查询的三种基础形式" class="headerlink" title="*联表查询的三种基础形式"></a>*联表查询的三种基础形式</h3><p>联表查询的基础语法如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT `字段列表` FROM `想查询的主表` INNER JOIN `想关联查询的副表（链式连接多个副表）` ON `主表的结点字段` = `副表的结点字段`;</span><br></pre></td></tr></table></figure>
+
+<p>我对这个语法的理解：从主表中查询X个字段（这些字段必须在主表或是副表中存在），然后将查询操作关联到副表，以ON连接主副表之间的跳板字段（该字段必须为同一个字段吗？联表查询的底层是以结点字段的行值再去副表进行查找吗？将副表中这个字段的行值换成其他字段的行值呢？）</p>
+<p>*注意：而在我自己操作后发现，Join语法都将左右表的字段<strong>全部</strong>拼接在一起，然后以<strong>结点字段为标识符</strong>查询两表，连接方式影响的是返回的数据。到这里，<strong>我们可以将结点字段理解成指针</strong>，**将主表理解成父表(父类)**再看下面我对Join连接的理解可能会有帮助。</p>
+<table>
+<thead>
+<tr>
+<th align="left">Inner Join 内连接</th>
+<th>只返回能匹配结点字段的行</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><strong>Left Join 左（父）连接</strong></td>
+<td><strong>返回左（父）表的所有行和能匹配结点的右表行，子表其余的行用NULL补全</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>Right Join 右（子）连接</strong></td>
+<td><strong>返回右（子）表的所有行和能匹配结点的左表行，父表其余的行用NULL补全</strong></td>
+</tr>
+<tr>
+<td align="left"><strong>自连接</strong></td>
+<td><strong>基础同上，就是将一张表拆分为两张表来用</strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h1 id="二、SQL分页和排序"><a href="#二、SQL分页和排序" class="headerlink" title="二、SQL分页和排序"></a>二、SQL分页和排序</h1><hr>
+<h3 id="分页的基础语法Limit"><a href="#分页的基础语法Limit" class="headerlink" title="分页的基础语法Limit"></a>分页的基础语法Limit</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">LIMIT `起始值N`，`页面大小PageSize`</span><br></pre></td></tr></table></figure>
+
+<p><strong>分页规则为：以查询出来的数据为表，第N+1个数据开始的PageSize个数据为一页。</strong></p>
+<p>假设有如下表格要进行分页。</p>
+<table>
+<thead>
+<tr>
+<th>序号</th>
+<th>名称</th>
+<th>等级</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>焢煌之钥</td>
+<td>50</td>
+</tr>
+<tr>
+<td>2</td>
+<td>天亟之钥</td>
+<td>50</td>
+</tr>
+<tr>
+<td>3</td>
+<td>真理之钥</td>
+<td>50</td>
+</tr>
+<tr>
+<td>4</td>
+<td>真我之钥</td>
+<td>50</td>
+</tr>
+<tr>
+<td>5</td>
+<td>犹大</td>
+<td>50</td>
+</tr>
+</tbody></table>
+<p>查询该表后写入LIMIT</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">LIMIT <span class="number">0</span>,<span class="number">2</span></span><br><span class="line"><span class="comment">-- 返回0+1=1开始的两个数据，即1，2号。即第1页</span></span><br><span class="line">LIMIT <span class="number">2</span>,<span class="number">2</span></span><br><span class="line"><span class="comment">-- 返回2+1=3开始的两个数据，即3，4号。即第2页</span></span><br><span class="line">LIMIT <span class="number">4</span>,<span class="number">2</span></span><br><span class="line"><span class="comment">-- 返回4+1=5开始的两个数据，即5，6号.即第3页.但这里只有5个数据，所有第3页只有一个数据，不会用NULL补全。</span></span><br></pre></td></tr></table></figure>
+
+<p>*<em>按上述所得，第N页的起始值为：(N-1)<em>PageSize，总页数为：数据量&#x2F;页面大小(非整除时总数+1)</em></em></p>
+<hr>
+<h3 id="子查询和嵌套查询"><a href="#子查询和嵌套查询" class="headerlink" title="子查询和嵌套查询"></a>子查询和嵌套查询</h3><p>子查询就是在原本已有的查询上再加入多层WHERE条件查询。嵌套就是基于此无限套娃。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">SELECT `factory_id` AS &#x27;生产工厂编号&#x27;,`factory_Name` AS &#x27;生产工厂名称&#x27;,`drug_Name` AS &#x27;药物名称&#x27;,`drug_id` AS &#x27;药物ID&#x27;,`drug_2_factoryID` AS &#x27;药物生产工厂编号&#x27;</span><br><span class="line">FROM `pill_factory` INNER JOIN `pill_drug` ON `factory_id` = `drug_2_factoryID`</span><br><span class="line"></span><br><span class="line">-- 以上就是基本的INNER连接查询。</span><br><span class="line"></span><br><span class="line">-- 下面这里等于原本的INNER查询结果中再再根据factory_id进行查找</span><br><span class="line">WHERE factory_id = ANY(</span><br><span class="line">	SELECT `factory_id` FROM `pill_factory`</span><br><span class="line">	WHERE factory_Code = &#x27;1111&#x27;)</span><br><span class="line">    -- 要根据的factory_id的条件是里面这个WHERE，可以用运算符链式编程，也可以再加入子嵌套，但要注意高次子嵌套的条件逻辑。</span><br><span class="line">    -- 并且要注意，这样的WHERE条件子查询的结果只能有一条，多了就会报错，要全部展示就加那个ANY</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h1 id="三、Mysql的常见函数"><a href="#三、Mysql的常见函数" class="headerlink" title="三、Mysql的常见函数"></a>三、Mysql的常见函数</h1></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>Author: </span><span class="post-copyright-info"><a href="http://example.com">坠入往昔的流光</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>Link: </span><span class="post-copyright-info"><a href="http://example.com/2023/09/27/Mysql%E7%9A%84%E8%BF%9B%E9%98%B6%E5%AD%A6%E4%B9%A0/">http://example.com/2023/09/27/Mysql的进阶学习/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a target="_blank" rel="noopener" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Web%E5%AD%A6%E4%B9%A0/">Web学习</a></div><div class="post_share"><div class="social-share" data-image="/img/Miku2.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2023/10/08/Java%E5%9F%BA%E7%A1%80/" title="Java基础"><div class="cover" style="background: var(--default-bg-color)"></div><div class="pagination-info"><div class="label">Previous</div><div class="prev_info">Java基础</div></div></a></div><div class="next-post pull-right"><a href="/2023/09/16/%E7%99%BB%E5%BD%95%E9%A1%B5%E9%9D%A2/" title="登录页面"><img class="cover" src="/img/Passageimg/Purple.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">Next</div><div class="next_info">登录页面</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>Related Articles</span></div><div class="relatedPosts-list"><div><a href="/2023/09/12/Mysql%E7%9A%84D-M-Q%E5%9F%BA%E7%A1%80/" title="Mysql的D-M-Q基础"><img class="cover" src="/img/Passageimg/Elysia.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-12</div><div class="title">Mysql的D-M-Q基础</div></div></a></div><div><a href="/2023/09/11/Mysql%E8%A1%A8%E8%AE%BE%E8%AE%A1%EF%BC%88%E4%B8%80%EF%BC%89/" title="Mysql表设计（一）"><img class="cover" src="/img/Passageimg/moutain.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-11</div><div class="title">Mysql表设计（一）</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/Miku2.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">坠入往昔的流光</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">Articles</div><div class="length-num">8</div></a><a href="/tags/"><div class="headline">Tags</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">Categories</div><div class="length-num">5</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/theresagx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/xxxxx" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="mailto:xxxxxx@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>Announcement</span></div><div class="announcement_content">公告暂时没有更新~因为把服务器改没了现在重新开始~</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>Contents</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%80%E3%80%81%E8%81%94%E8%A1%A8%E6%9F%A5%E8%AF%A2-Join%E6%93%8D%E4%BD%9C"><span class="toc-number">2.</span> <span class="toc-text">一、联表查询(Join操作)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%81%94%E8%A1%A8%E6%9F%A5%E8%AF%A2%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F"><span class="toc-number">2.0.1.</span> <span class="toc-text">联表查询有什么用？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%81%94%E8%A1%A8%E6%9F%A5%E8%AF%A2%E7%9A%84%E4%B8%89%E7%A7%8D%E5%9F%BA%E7%A1%80%E5%BD%A2%E5%BC%8F"><span class="toc-number">2.0.2.</span> <span class="toc-text">*联表查询的三种基础形式</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BA%8C%E3%80%81SQL%E5%88%86%E9%A1%B5%E5%92%8C%E6%8E%92%E5%BA%8F"><span class="toc-number">3.</span> <span class="toc-text">二、SQL分页和排序</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%86%E9%A1%B5%E7%9A%84%E5%9F%BA%E7%A1%80%E8%AF%AD%E6%B3%95Limit"><span class="toc-number">3.0.1.</span> <span class="toc-text">分页的基础语法Limit</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%90%E6%9F%A5%E8%AF%A2%E5%92%8C%E5%B5%8C%E5%A5%97%E6%9F%A5%E8%AF%A2"><span class="toc-number">3.0.2.</span> <span class="toc-text">子查询和嵌套查询</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%B8%89%E3%80%81Mysql%E7%9A%84%E5%B8%B8%E8%A7%81%E5%87%BD%E6%95%B0"><span class="toc-number">4.</span> <span class="toc-text">三、Mysql的常见函数</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>Recent Post</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/10/08/Java%E5%9F%BA%E7%A1%80/" title="Java基础">Java基础</a><time datetime="2023-10-08T06:23:44.000Z" title="Created 2023-10-08 14:23:44">2023-10-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/09/27/Mysql%E7%9A%84%E8%BF%9B%E9%98%B6%E5%AD%A6%E4%B9%A0/" title="Mysql的进阶学习">Mysql的进阶学习</a><time datetime="2023-09-27T07:12:45.000Z" title="Created 2023-09-27 15:12:45">2023-09-27</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/09/16/%E7%99%BB%E5%BD%95%E9%A1%B5%E9%9D%A2/" title="登录页面">登录页面</a><time datetime="2023-09-16T02:34:22.000Z" title="Created 2023-09-16 10:34:22">2023-09-16</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/09/13/%E5%A4%A7%E6%95%B0%E6%8D%AE%E5%9F%BA%E7%A1%80%E2%80%94%E2%80%94Hadoop/" title="大数据基础——Hadoop">大数据基础——Hadoop</a><time datetime="2023-09-13T06:58:53.000Z" title="Created 2023-09-13 14:58:53">2023-09-13</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/09/12/Mysql%E7%9A%84D-M-Q%E5%9F%BA%E7%A1%80/" title="Mysql的D-M-Q基础">Mysql的D-M-Q基础</a><time datetime="2023-09-12T03:00:51.000Z" title="Created 2023-09-12 11:00:51">2023-09-12</time></div></div></div></div></div></div></main><footer id="footer" style="background: transparent"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2023 By 坠入往昔的流光</div><div class="framework-info"><span>Framework </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>Theme </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">欢迎，高洁而纯真的灵魂</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="Read Mode"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="Toggle Between Light And Dark Mode"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="Toggle between Single-column and Double-column"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="Setting"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="Table Of Contents"><i class="fas fa-list-ul"></i></button><button id="chat-btn" type="button" title="Chat"><i class="fas fa-sms"></i></button><button id="go-up" type="button" title="Back To Top"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><div class="js-pjax"></div><script src="/js/sakura.js"></script><script src="https://cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script><script defer src="https://rmt.dogedoge.com/fetch/~/source/jsdelivr/npm/jquery@latest/dist/jquery.min.js"></script><script defer data-pjax src="https://gcore.jsdelivr.net/gh/sirxemic/jquery.ripples/dist/jquery.ripples.js"></script><script defer data-pjax src="/js/ripples.js"></script><script src="https://widget.qweather.net/simple/static/js/he-simple-common.js?v=2.0"></script><script src="/js/weather.js"></script><div class="aplayer no-destroy" data-id="8720873083" data-server="netease" data-type="playlist" data-fixed="true" data-autoplay="true" data-mini="true"> </div><script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script><script src="/js/fish.js"></script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/metingjs/dist/Meting.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: false,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:send', function () {
+
+  // removeEventListener
+  btf.removeGlobalFnEvent('pjax')
+  btf.removeGlobalFnEvent('themeChange')
+
+  document.getElementById('rightside').classList.remove('rightside-show')
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+  typeof disqusjs === 'object' && disqusjs.destroy()
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof panguInit === 'function' && panguInit()
+
+  // google analytics
+  typeof gtag === 'function' && gtag('config', '', {'page_path': window.location.pathname});
+
+  // baidu analytics
+  typeof _hmt === 'object' && _hmt.push(['_trackPageview',window.location.pathname]);
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+})
+
+document.addEventListener('pjax:error', e => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
